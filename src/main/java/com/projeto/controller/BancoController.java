@@ -7,11 +7,13 @@ public class BancoController {
     private TabelaHash<String, ContaBancaria> mapaContas;
     private HeapBinaria filaAtendimento;
     private Pilha<String> historicoOperacoes;
+    private Arvore<ContaBancaria> arvoreContas;
 
     public BancoController() {
         this.mapaContas = new TabelaHash<>();
         this.filaAtendimento = new HeapBinaria(100); // Capacidade inicial
         this.historicoOperacoes = new PilhaEncadeada<>();
+        this.arvoreContas = new ArvoreAVL<>();
     }
 
     // 1. Cadastro de Conta
@@ -22,6 +24,7 @@ public class BancoController {
         }
         ContaBancaria novaConta = new ContaBancaria(cpf, nome, prioridade, saldoInicial);
         mapaContas.inserir(cpf, novaConta);
+        arvoreContas.inserir(novaConta);
         historicoOperacoes.push("Conta criada: " + cpf);
         System.out.println("Conta cadastrada com sucesso!");
     }
@@ -56,5 +59,15 @@ public class BancoController {
     public String desfazerUltimaAcao() {
         if (historicoOperacoes.isEmpty()) return "Nenhuma ação para desfazer.";
         return "Ação desfeita: " + historicoOperacoes.pop();
+    }
+
+    public void listarContasOrdenadas() {
+        if (arvoreContas.estaVazia()) {
+            System.out.println("Nenhuma conta cadastrada.");
+            return;
+        }
+
+        System.out.println("Contas cadastradas em ordem:");
+        ((ArvoreAVL<ContaBancaria>) arvoreContas).emOrdem();
     }
 }

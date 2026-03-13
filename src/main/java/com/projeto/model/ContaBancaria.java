@@ -37,4 +37,6 @@ public class ContaBancaria implements Comparable<ContaBancaria> {
     // Getters...
     public int getPrioridade() { return prioridade; }
     public String getNumero() { return numero; }
+    public String getTitular() { return titular;}
+    public double getSaldo() { return saldo;}
 }

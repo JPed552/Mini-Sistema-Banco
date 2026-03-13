@@ -2,7 +2,7 @@ package com.projeto.structures;
 
 import com.projeto.model.ContaBancaria;
 
-public class HeapBinaria {
+public class HeapBinaria implements Heap<ContaBancaria>{
     private ContaBancaria[] heap;
     private int tamanho;
     private int capacidade;
@@ -13,6 +13,7 @@ public class HeapBinaria {
         this.tamanho = 0;
     }
 
+    @Override
     public void inserir(ContaBancaria conta) {
         if (tamanho == capacidade) throw new IllegalStateException("Fila cheia");
         heap[tamanho] = conta;
@@ -20,6 +21,7 @@ public class HeapBinaria {
         tamanho++;
     }
 
+    @Override
     public ContaBancaria remover() {
         if (estaVazia()) return null;
         ContaBancaria raiz = heap[0];
@@ -56,5 +58,17 @@ public class HeapBinaria {
         heap[j] = temp;
     }
 
+    @Override
+    public ContaBancaria topo() {
+        if (estaVazia()) return null;
+        return heap[0];
+    }
+
+    @Override
+    public int tamanho() {
+        return tamanho;
+    }
+
+    @Override
     public boolean estaVazia() { return tamanho == 0; }
 }
