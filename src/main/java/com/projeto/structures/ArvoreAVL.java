@@ -1,4 +1,6 @@
 package com.projeto.structures;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArvoreAVL<T extends Comparable<T>> implements Arvore<T>{
 
@@ -18,6 +20,10 @@ public class ArvoreAVL<T extends Comparable<T>> implements Arvore<T>{
 
     private int altura(No no) {
         return (no == null) ? 0 : no.altura;
+    }
+
+    public int getAltura() {
+        return altura(raiz);
     }
 
     private int fatorBalanceamento(No no) {
@@ -109,16 +115,18 @@ public class ArvoreAVL<T extends Comparable<T>> implements Arvore<T>{
         return buscar(no.direita, valor);
     }
 
-    public void emOrdem() {
-        emOrdem(raiz);
+    @Override
+    public List<T> emOrdem() {
+        List<T> resultado = new ArrayList<>();
+        emOrdem(raiz, resultado);
+        return resultado;
     }
 
-    private void emOrdem(No no) {
-
+    private void emOrdem(No no, List<T> resultado) {
         if (no != null) {
-            emOrdem(no.esquerda);
-            System.out.println(no.valor);
-            emOrdem(no.direita);
+            emOrdem(no.esquerda, resultado);
+            resultado.add(no.valor);
+            emOrdem(no.direita, resultado);
         }
     }
     @Override

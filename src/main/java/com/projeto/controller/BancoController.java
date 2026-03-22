@@ -3,33 +3,41 @@ package com.projeto.controller;
 import com.projeto.model.ContaBancaria;
 import com.projeto.structures.*;
 
+import java.util.List;
+
 public class BancoController {
     private TabelaHash<String, ContaBancaria> mapaContas;
     private HeapBinaria filaAtendimento;
     private Pilha<String> historicoOperacoes;
     private Arvore<ContaBancaria> arvoreContas;
 
+    // A ESTRUTURA OBRIGATÓRIA QUE VOCÊ ESQUECEU
+    private Fila<String> filaTransacoesPendentes;
+
     public BancoController() {
-        this.mapaContas = new TabelaHash<>();
-        this.filaAtendimento = new HeapBinaria(100); // Capacidade inicial
+        this.mapaContas = new TabelaHash<>(100); // Lembre-se de passar a capacidade se a sua Hash exigir
+        this.filaAtendimento = new HeapBinaria(100);
         this.historicoOperacoes = new PilhaEncadeada<>();
         this.arvoreContas = new ArvoreAVL<>();
+        this.filaTransacoesPendentes = new FilaComPilhas<>();
     }
 
-    // 1. Cadastro de Conta
     public void cadastrarConta(String cpf, String nome, int prioridade, double saldoInicial) {
         if (mapaContas.buscar(cpf) != null) {
-            System.out.println("Erro: CPF já cadastrado.");
+            System.out.println("Erro: Conta (CPF) já cadastrada.");
             return;
         }
         ContaBancaria novaConta = new ContaBancaria(cpf, nome, prioridade, saldoInicial);
+
+        // Insere na Hash para busca O(1)
         mapaContas.inserir(cpf, novaConta);
+        // Insere na AVL para listagem O(log n)
         arvoreContas.inserir(novaConta);
+
         historicoOperacoes.push("Conta criada: " + cpf);
         System.out.println("Conta cadastrada com sucesso!");
     }
 
-    // 2. Entrada na Fila de Atendimento (Triagem)
     public void entrarNaFila(String cpf) {
         ContaBancaria conta = mapaContas.buscar(cpf);
         if (conta == null) {
@@ -37,28 +45,40 @@ public class BancoController {
             return;
         }
         filaAtendimento.inserir(conta);
-        System.out.println("Cliente " + conta.getNumero() + " entrou na fila de espera.");
+        System.out.println("Cliente " + conta.getTitular() + " entrou na fila de atendimento físico.");
     }
 
-    // 3. Atendimento do Próximo Cliente (O coração da Heap)
     public ContaBancaria atenderProximo() {
         if (filaAtendimento.estaVazia()) {
-            System.out.println("Fila vazia.");
+            System.out.println("Nenhum cliente na fila de atendimento.");
             return null;
         }
-        ContaBancaria proximo = filaAtendimento.remover();
-        historicoOperacoes.push("Atendimento realizado: " + proximo.getNumero());
+        ContaBancaria proximo = filaAtendimento.remover(); // VIP sai primeiro
+        historicoOperacoes.push("Atendimento físico realizado para: " + proximo.getNumero());
         return proximo;
     }
 
-    // 4. Busca de Dados
-    public ContaBancaria buscarConta(String cpf) {
-        return mapaContas.buscar(cpf);
+    // ====================================================================
+    // A JUSTIFICATIVA DA FILA COM 2 PILHAS (PROCESSAMENTO EM LOTE / FIFO)
+    // ====================================================================
+    public void agendarTransacao(String descricao) {
+        filaTransacoesPendentes.enqueue(descricao);
+        System.out.println("Transação agendada: " + descricao);
+        historicoOperacoes.push("Transação adicionada à fila: " + descricao);
     }
 
-    public String desfazerUltimaAcao() {
-        if (historicoOperacoes.isEmpty()) return "Nenhuma ação para desfazer.";
-        return "Ação desfeita: " + historicoOperacoes.pop();
+    public void processarProximaTransacao() {
+        if (filaTransacoesPendentes.isEmpty()) {
+            System.out.println("Nenhuma transação pendente no momento.");
+            return;
+        }
+        String transacao = filaTransacoesPendentes.dequeue();
+        System.out.println("Processando transação (Lote): " + transacao);
+        historicoOperacoes.push("Transação processada: " + transacao);
+    }
+
+    public ContaBancaria buscarConta(String cpf) {
+        return mapaContas.buscar(cpf);
     }
 
     public void listarContasOrdenadas() {
@@ -67,7 +87,21 @@ public class BancoController {
             return;
         }
 
-        System.out.println("Contas cadastradas em ordem:");
-        ((ArvoreAVL<ContaBancaria>) arvoreContas).emOrdem();
+        System.out.println("\n--- RELATÓRIO DE CONTAS (ÁRVORE AVL) ---");
+        // O CONSERTO: Agora recebemos a lista e iteramos, em vez de ignorar o retorno.
+        List<ContaBancaria> contas = arvoreContas.emOrdem();
+        for (ContaBancaria c : contas) {
+            System.out.println("CPF: " + c.getNumero() + " | Titular: " + c.getTitular() + " | Saldo: " + c.getSaldo());
+        }
+        System.out.println("----------------------------------------\n");
+    }
+
+    public void desfazerUltimaAcao() {
+        if (historicoOperacoes.isEmpty()) {
+            System.out.println("Nenhuma ação no histórico.");
+            return;
+        }
+        System.out.println("Histórico: " + historicoOperacoes.pop());
+        System.out.println("[Aviso: O estorno real de dados não está implementado]");
     }
 }

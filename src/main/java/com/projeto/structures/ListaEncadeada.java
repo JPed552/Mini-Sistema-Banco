@@ -62,6 +62,8 @@ public class ListaEncadeada<T> implements Iterable<T>{
     public boolean estaVazia() { return head == null; }
     public int tamanho() { return size; }
 
+
+
     @Override
     public java.util.Iterator<T> iterator() {
 
@@ -72,6 +74,7 @@ public class ListaEncadeada<T> implements Iterable<T>{
             public boolean hasNext() {
                 return atual != null;
             }
+
 
             public T next() {
                 T data = atual.data;
