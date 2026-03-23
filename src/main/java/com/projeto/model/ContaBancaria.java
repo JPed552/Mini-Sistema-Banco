@@ -16,6 +16,20 @@ public class ContaBancaria implements Comparable<ContaBancaria> {
         this.saldo = saldo;
     }
 
+    public void depositar(double valor) {
+        this.saldo += valor;
+    }
+
+    public boolean sacar(double valor) {
+        if (valor <= this.saldo) {
+            this.saldo -= valor;
+            return true;
+        } else {
+            System.out.println("Saldo insuficiente para a conta: " + this.titular);
+            return false;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

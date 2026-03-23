@@ -10,12 +10,10 @@ public class BancoController {
     private HeapBinaria filaAtendimento;
     private Pilha<String> historicoOperacoes;
     private Arvore<ContaBancaria> arvoreContas;
-
-    // A ESTRUTURA OBRIGATÓRIA QUE VOCÊ ESQUECEU
     private Fila<String> filaTransacoesPendentes;
 
     public BancoController() {
-        this.mapaContas = new TabelaHash<>(100); // Lembre-se de passar a capacidade se a sua Hash exigir
+        this.mapaContas = new TabelaHash<>(100);
         this.filaAtendimento = new HeapBinaria(100);
         this.historicoOperacoes = new PilhaEncadeada<>();
         this.arvoreContas = new ArvoreAVL<>();
@@ -23,17 +21,19 @@ public class BancoController {
     }
 
     public void cadastrarConta(String cpf, String nome, int prioridade, double saldoInicial) {
+        if (cpf == null || cpf.length() != 11 || !cpf.matches("\\d+")) {
+            System.out.println("Erro: CPF inválido. Deve conter exatamente 11 dígitos numéricos.");
+            return;
+        }
+
         if (mapaContas.buscar(cpf) != null) {
             System.out.println("Erro: Conta (CPF) já cadastrada.");
             return;
         }
+
         ContaBancaria novaConta = new ContaBancaria(cpf, nome, prioridade, saldoInicial);
-
-        // Insere na Hash para busca O(1)
         mapaContas.inserir(cpf, novaConta);
-        // Insere na AVL para listagem O(log n)
         arvoreContas.inserir(novaConta);
-
         historicoOperacoes.push("Conta criada: " + cpf);
         System.out.println("Conta cadastrada com sucesso!");
     }
@@ -53,14 +53,11 @@ public class BancoController {
             System.out.println("Nenhum cliente na fila de atendimento.");
             return null;
         }
-        ContaBancaria proximo = filaAtendimento.remover(); // VIP sai primeiro
+        ContaBancaria proximo = filaAtendimento.remover();
         historicoOperacoes.push("Atendimento físico realizado para: " + proximo.getNumero());
         return proximo;
     }
 
-    // ====================================================================
-    // A JUSTIFICATIVA DA FILA COM 2 PILHAS (PROCESSAMENTO EM LOTE / FIFO)
-    // ====================================================================
     public void agendarTransacao(String descricao) {
         filaTransacoesPendentes.enqueue(descricao);
         System.out.println("Transação agendada: " + descricao);
@@ -72,9 +69,39 @@ public class BancoController {
             System.out.println("Nenhuma transação pendente no momento.");
             return;
         }
+
         String transacao = filaTransacoesPendentes.dequeue();
-        System.out.println("Processando transação (Lote): " + transacao);
-        historicoOperacoes.push("Transação processada: " + transacao);
+
+        try {
+            String[] partes = transacao.split(";");
+            String cpf = partes[0];
+            double valor = Double.parseDouble(partes[1]);
+
+            ContaBancaria conta = mapaContas.buscar(cpf);
+
+            if (conta != null) {
+                if (valor > 0) {
+                    conta.depositar(valor);
+                    System.out.println("Depósito de R$ " + valor + " processado para: " + conta.getTitular());
+                    historicoOperacoes.push("Sucesso: Depósito CPF " + cpf + " valor " + valor);
+                } else {
+                    double valorPositivo = Math.abs(valor);
+                    boolean conseguiuSacar = conta.sacar(valorPositivo);
+
+                    if (conseguiuSacar) {
+                        System.out.println("Saque de R$ " + valorPositivo + " processado para: " + conta.getTitular());
+                        historicoOperacoes.push("Sucesso: Saque CPF " + cpf + " valor " + valorPositivo);
+                    } else {
+                        System.out.println("ALERTA: O saque foi cancelado por falta de saldo.");
+                        historicoOperacoes.push("FALHA: Saque negado (Saldo insuficiente) - CPF " + cpf);
+                    }
+                }
+            } else {
+                System.out.println("Erro: Conta com CPF " + cpf + " não encontrada.");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao processar transação. Formato esperado: 'CPF;VALOR'.");
+        }
     }
 
     public ContaBancaria buscarConta(String cpf) {
@@ -88,7 +115,6 @@ public class BancoController {
         }
 
         System.out.println("\n--- RELATÓRIO DE CONTAS (ÁRVORE AVL) ---");
-        // O CONSERTO: Agora recebemos a lista e iteramos, em vez de ignorar o retorno.
         List<ContaBancaria> contas = arvoreContas.emOrdem();
         for (ContaBancaria c : contas) {
             System.out.println("CPF: " + c.getNumero() + " | Titular: " + c.getTitular() + " | Saldo: " + c.getSaldo());
@@ -103,5 +129,27 @@ public class BancoController {
         }
         System.out.println("Histórico: " + historicoOperacoes.pop());
         System.out.println("[Aviso: O estorno real de dados não está implementado]");
+    }
+
+    public void registrarTransacaoDeAtendimento(ContaBancaria conta, double valor) {
+        if (conta == null) return;
+
+        String comando = conta.getNumero() + ";" + valor;
+
+        this.agendarTransacao(comando);
+
+        System.out.println("Atendimento registado para: " + conta.getTitular());
+        System.out.println("Transação de R$ " + valor + " enviada para a fila de processamento.");
+    }
+    public void excluirConta(String cpf) {
+        ContaBancaria conta = mapaContas.buscar(cpf);
+        if (conta != null) {
+            mapaContas.remover(cpf);
+            arvoreContas.remover(conta);
+            historicoOperacoes.push("Conta removida: " + cpf);
+            System.out.println("Conta excluída com sucesso.");
+        } else {
+            System.out.println("Erro: Conta não encontrada.");
+        }
     }
 }
