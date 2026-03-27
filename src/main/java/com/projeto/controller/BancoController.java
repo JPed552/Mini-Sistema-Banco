@@ -122,13 +122,15 @@ public class BancoController {
         System.out.println("----------------------------------------\n");
     }
 
-    public void desfazerUltimaAcao() {
-        if (historicoOperacoes.isEmpty()) {
-            System.out.println("Nenhuma ação no histórico.");
+    public void exibirUltimoLog() {
+        if (historicoOperacoes.isEmpty()) { // Verifica se a pilha está vazia
+            System.out.println("Nenhuma operação registrada no histórico.");
             return;
         }
-        System.out.println("Histórico: " + historicoOperacoes.pop());
-        System.out.println("[Aviso: O estorno real de dados não está implementado]");
+
+        // Remove e retorna o elemento no topo da Pilha (LIFO)
+        String ultimoEvento = historicoOperacoes.pop();
+        System.out.println("ÚLTIMO EVENTO REGISTRADO: " + ultimoEvento);
     }
 
     public void registrarTransacaoDeAtendimento(ContaBancaria conta, double valor) {

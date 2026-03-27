@@ -21,7 +21,7 @@ public class Main {
             System.out.println("5. Atender Próximo Cliente (Heap)");
             System.out.println("6. Excluir conta");
             System.out.println("7. Processar Próxima Transação (Fila/Pilhas)");
-            System.out.println("8. Desfazer Última Ação (Pilha)");
+            System.out.println("8. Exibir Última Operação (Pilha)");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
 
@@ -100,7 +100,7 @@ public class Main {
                     break;
 
                 case 8:
-                    banco.desfazerUltimaAcao();
+                    banco.exibirUltimoLog();
                     break;
 
                 case 0:
