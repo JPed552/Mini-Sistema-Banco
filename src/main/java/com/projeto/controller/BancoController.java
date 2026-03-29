@@ -122,15 +122,20 @@ public class BancoController {
         System.out.println("----------------------------------------\n");
     }
 
-    public void exibirUltimoLog() {
-        if (historicoOperacoes.isEmpty()) { // Verifica se a pilha está vazia
-            System.out.println("Nenhuma operação registrada no histórico.");
+    public void exibirHistoricoCompleto() {
+        if (historicoOperacoes.isEmpty()) {
+            System.out.println("Nenhum histórico de operações disponível.");
             return;
         }
 
-        // Remove e retorna o elemento no topo da Pilha (LIFO)
-        String ultimoEvento = historicoOperacoes.pop();
-        System.out.println("ÚLTIMO EVENTO REGISTRADO: " + ultimoEvento);
+        System.out.println("\n--- HISTÓRICO COMPLETO DE OPERAÇÕES (PILHA) ---");
+        // O iterator da ListaEncadeada percorre do head (topo) para o fim
+        int i = 1;
+        for (String log : (PilhaEncadeada<String>) historicoOperacoes) {
+            System.out.println(i + ". " + log);
+            i++;
+        }
+        System.out.println("----------------------------------------------");
     }
 
     public void registrarTransacaoDeAtendimento(ContaBancaria conta, double valor) {

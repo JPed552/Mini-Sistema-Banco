@@ -17,4 +17,9 @@ public class PilhaEncadeada<T> implements Pilha<T> {
 
     @Override
     public int size() { return lista.tamanho(); }
+
+    @Override
+    public java.util.Iterator<T> iterator() {
+        return lista.iterator();
+    }
 }
