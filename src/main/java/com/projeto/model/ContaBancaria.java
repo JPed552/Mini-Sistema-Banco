@@ -45,6 +45,12 @@ public class ContaBancaria implements Comparable<ContaBancaria> {
 
     @Override
     public int compareTo(ContaBancaria outra) {
+        int comparacaoNome = this.titular.compareTo(outra.titular);
+
+        if (comparacaoNome != 0) {
+            return comparacaoNome;
+        }
+
         return this.numero.compareTo(outra.numero);
     }
 

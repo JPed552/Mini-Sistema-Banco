@@ -38,7 +38,6 @@ public class TabelaHash<K, V> implements Hash<K, V> {
     }
 
     private int hash(K chave) {
-        // Bitwise AND para prevenir índices negativos e garantir distribuição
         return (chave.hashCode() & 0x7fffffff) % capacidade;
     }
 
@@ -89,7 +88,7 @@ public class TabelaHash<K, V> implements Hash<K, V> {
         }
 
         if (alvo != null) {
-            lista.remover(alvo); // Requer que Entrada tenha equals()
+            lista.remover(alvo);
             tamanho--;
             return alvo.valor;
         }

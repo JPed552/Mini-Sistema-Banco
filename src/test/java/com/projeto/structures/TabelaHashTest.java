@@ -43,4 +43,17 @@ class TabelaHashTest {
         assertNull(hash.buscar(1), "Após remoção, a chave deve ser inacessível.");
         assertTrue(hash.estaVazia(), "A tabela deve estar vazia após remover o único elemento.");
     }
+    @Test
+    void rehash_TesteDeCarga_DeveDobrarCapacidadeSemPerderDados() {
+        hash.inserir(1, "A");
+        hash.inserir(2, "B");
+        hash.inserir(3, "C");
+        hash.inserir(4, "D");
+        hash.inserir(5, "E");
+        hash.inserir(6, "F");
+
+        assertEquals(6, hash.tamanho(), "Deve suportar inserções além da capacidade inicial.");
+        assertEquals("A", hash.buscar(1), "Falha Crítica: O Rehash corrompeu a busca dos primeiros elementos.");
+        assertEquals("F", hash.buscar(6), "Falha Crítica: Elementos pós-rehash não foram mapeados corretamente.");
+    }
 }

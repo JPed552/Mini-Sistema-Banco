@@ -11,7 +11,6 @@ class HeapBinariaTest {
 
     @BeforeEach
     void setUp() {
-        // Inicializa com capacidade 3 para forçarmos o teste de Fila Cheia rapidamente
         heap = new HeapBinaria(3);
     }
 
@@ -26,7 +25,6 @@ class HeapBinariaTest {
         heap.inserir(vip);
         heap.inserir(comum2);
 
-        // O VIP foi o segundo a entrar, mas DEVE ser o primeiro a sair
         assertEquals("222", heap.remover().getNumero(), "Falha Crítica: O VIP não assumiu o topo da Heap.");
         assertEquals(2, heap.remover().getPrioridade(), "O próximo deve ser prioridade 2.");
         assertEquals(2, heap.remover().getPrioridade(), "O último deve ser prioridade 2.");
